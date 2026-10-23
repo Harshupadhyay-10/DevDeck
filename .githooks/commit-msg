@@ -1,0 +1,17 @@
+#!/bin/sh
+# Rejects commit messages that carry tool attribution or em dashes.
+# Enable with: git config core.hooksPath .githooks
+
+msg_file="$1"
+body=$(grep -v '^#' "$msg_file")
+dash=$(printf '\342\200\224')
+
+if printf '%s\n' "$body" | grep -qiE '^(co-authored-by|claude-session):|generated with|claude code|anthropic\.com'; then
+    echo "commit-msg: attribution trailer or tool mention found. Remove it." >&2
+    exit 1
+fi
+
+if printf '%s\n' "$body" | grep -qF "$dash"; then
+    echo "commit-msg: em dash found. Rewrite the sentence." >&2
+    exit 1
+fi
