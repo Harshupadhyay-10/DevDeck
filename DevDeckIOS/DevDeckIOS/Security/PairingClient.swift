@@ -45,7 +45,7 @@ final class PairingClient {
     func startBrowsing() {
         discoveredMacs = []
         discoveredHostPorts = [:]
-        browser.start()
+        browser.start(type: DevDeckService.pairingType)
     }
 
     func stopBrowsing() {
@@ -137,8 +137,9 @@ final class PairingClient {
             throw PairingFailure("Pairing could not be confirmed.")
         }
 
+        let existingID = macStore.devices.first { $0.publicKeyData == macHello.publicKey }?.id
         return PairedDevice(
-            id: UUID().uuidString,
+            id: existingID ?? UUID().uuidString,
             displayName: macHello.displayName,
             publicKeyData: macHello.publicKey,
             pairedAt: Date()

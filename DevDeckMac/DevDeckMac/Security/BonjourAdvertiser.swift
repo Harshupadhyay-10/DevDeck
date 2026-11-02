@@ -15,9 +15,9 @@ import Foundation
 final class BonjourAdvertiser: NSObject {
     private var service: NetService?
 
-    func publish(name: String, port: UInt16, txtRecord: Data) {
+    func publish(name: String, type: String, port: UInt16, txtRecord: Data) {
         stop()
-        let newService = NetService(domain: "local.", type: DevDeckService.type, name: name, port: Int32(port))
+        let newService = NetService(domain: "local.", type: type, name: name, port: Int32(port))
         newService.delegate = self
         _ = newService.setTXTRecord(txtRecord)
         newService.publish()
@@ -30,4 +30,8 @@ final class BonjourAdvertiser: NSObject {
     }
 }
 
-extension BonjourAdvertiser: NetServiceDelegate {}
+extension BonjourAdvertiser: NetServiceDelegate {
+    func netService(_ sender: NetService, didNotPublish errorDict: [String: NSNumber]) {
+        print("DevDeck: Bonjour publish failed for \(sender.name): \(errorDict)")
+    }
+}

@@ -20,10 +20,10 @@ final class BonjourBrowser: NSObject {
 
     var onUpdate: (([String: (host: String, port: UInt16)]) -> Void)?
 
-    func start() {
+    func start(type: String) {
         stop()
         browser.delegate = self
-        browser.searchForServices(ofType: DevDeckService.type, inDomain: "local.")
+        browser.searchForServices(ofType: type, inDomain: "local.")
     }
 
     func stop() {
@@ -37,6 +37,10 @@ final class BonjourBrowser: NSObject {
 }
 
 extension BonjourBrowser: NetServiceBrowserDelegate {
+    func netServiceBrowser(_ browser: NetServiceBrowser, didNotSearch errorDict: [String: NSNumber]) {
+        print("DevDeck: Bonjour search failed: \(errorDict)")
+    }
+
     func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
         services[service.name] = service
         service.delegate = self

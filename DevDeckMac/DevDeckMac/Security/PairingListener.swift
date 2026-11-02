@@ -77,7 +77,7 @@ final class PairingListener {
         )
 
         let txtRecord = PairingTXTRecord.encode(host: host, port: port)
-        advertiser.publish(name: serviceName, port: port, txtRecord: txtRecord)
+        advertiser.publish(name: serviceName, type: DevDeckService.pairingType, port: port, txtRecord: txtRecord)
     }
 
     func stop() {
@@ -135,8 +135,9 @@ final class PairingListener {
             return
         }
 
+        let existingID = deviceStore.devices.first { $0.publicKeyData == hello.publicKey }?.id
         let device = PairedDevice(
-            id: UUID().uuidString,
+            id: existingID ?? UUID().uuidString,
             displayName: hello.displayName,
             publicKeyData: hello.publicKey,
             pairedAt: Date()

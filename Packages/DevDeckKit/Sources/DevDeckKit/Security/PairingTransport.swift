@@ -1,8 +1,12 @@
 import Foundation
 
-/// The Bonjour service type both apps advertise and browse for.
+/// The Bonjour service types both apps advertise and browse for. Pairing
+/// and running actions are kept as separate services: pairing only
+/// advertises for as long as the Mac's pairing sheet is open, while the
+/// run service advertises continuously whenever the Mac app is running.
 public enum DevDeckService {
-    public static let type = "_devdeck._tcp."
+    public static let pairingType = "_devdeck._tcp."
+    public static let runType = "_devdeckrun._tcp."
 }
 
 public struct PairingTimeout: Error {}
