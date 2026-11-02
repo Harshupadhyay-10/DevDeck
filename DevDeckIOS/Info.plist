@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_devdeck._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Dev Deck needs local network access to find and pair with your Mac.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Dev Deck uses the camera to scan the pairing QR code shown on your Mac.</string>
+</dict>
+</plist>

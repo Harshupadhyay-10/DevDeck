@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
     let actions: [DeckAction]
+    @State private var showingPairing = false
 
     var body: some View {
         NavigationStack {
@@ -18,6 +19,18 @@ struct ContentView: View {
             }
             .navigationTitle("Dev Deck")
             .background(.background)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingPairing = true
+                    } label: {
+                        Label("Pair with Mac", systemImage: "wifi")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingPairing) {
+                PairingView()
+            }
         }
     }
 }
