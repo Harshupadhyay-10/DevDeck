@@ -11,6 +11,15 @@ import SwiftUI
 struct ContentView: View {
     @State private var store = DeckStore()
     @State private var selectedActionID: String?
+    @State private var deviceStore: PairedDeviceStore
+    @State private var pairingListener: PairingListener
+    @State private var showingPairingSheet = false
+
+    init() {
+        let deviceStore = PairedDeviceStore(service: MacIdentity.pairedDevicesService)
+        _deviceStore = State(initialValue: deviceStore)
+        _pairingListener = State(initialValue: PairingListener(deviceStore: deviceStore))
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -37,14 +46,29 @@ struct ContentView: View {
             }
         }
         .navigationTitle("Dev Deck")
+        .sheet(isPresented: $showingPairingSheet) {
+            PairingSheet(listener: pairingListener)
+        }
     }
 
     private var sidebar: some View {
         List(selection: $selectedActionID) {
             Section("Device") {
-                Label("Connect to Device...", systemImage: "wifi")
-                    .foregroundStyle(.secondary)
-                    .disabled(true)
+                Button {
+                    showingPairingSheet = true
+                } label: {
+                    Label("Connect to Device...", systemImage: "wifi")
+                }
+                .buttonStyle(.plain)
+
+                ForEach(deviceStore.devices) { device in
+                    Label(device.displayName, systemImage: "iphone")
+                        .contextMenu {
+                            Button("Remove", role: .destructive) {
+                                deviceStore.remove(device)
+                            }
+                        }
+                }
             }
 
             Section("Actions") {
