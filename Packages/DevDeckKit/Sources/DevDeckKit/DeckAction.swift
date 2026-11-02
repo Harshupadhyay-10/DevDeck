@@ -8,12 +8,20 @@ public struct DeckAction: Identifiable, Codable, Hashable, Sendable {
     public var title: String
     public var systemImage: String
     public var isDestructive: Bool
+    public var style: TileStyle
 
-    public init(id: String, title: String, systemImage: String, isDestructive: Bool = false) {
+    public init(
+        id: String,
+        title: String,
+        systemImage: String,
+        isDestructive: Bool = false,
+        style: TileStyle = .default
+    ) {
         self.id = id
         self.title = title
         self.systemImage = systemImage
         self.isDestructive = isDestructive
+        self.style = style
     }
 }
 

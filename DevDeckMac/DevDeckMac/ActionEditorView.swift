@@ -8,9 +8,9 @@
 import DevDeckKit
 import SwiftUI
 
-/// Editor for one deck action: display (title, SF Symbol, destructive)
-/// plus the actual command behind it, which stays on the Mac and is
-/// never sent to the phone. The Mac is the only place actions are
+/// Editor for one deck action: display (title, SF Symbol, destructive,
+/// appearance) plus the actual command behind it, which stays on the Mac
+/// and is never sent to the phone. The Mac is the only place actions are
 /// edited.
 struct ActionEditorView: View {
     @Bindable var store: DeckStore
@@ -35,6 +35,20 @@ struct ActionEditorView: View {
                     TextField("Title", text: $store.actions[index].title)
                     TextField("SF Symbol name", text: $store.actions[index].systemImage)
                     Toggle("Destructive", isOn: $store.actions[index].isDestructive)
+                }
+
+                Section("Appearance") {
+                    Picker("Style", selection: $store.actions[index].style.material) {
+                        Text("Glass").tag(TileStyle.Material.glass)
+                        Text("Solid").tag(TileStyle.Material.solid)
+                    }
+                    .pickerStyle(.segmented)
+
+                    SwatchColorPicker(title: "Tint", selection: tintBinding(index: index))
+
+                    if store.actions[index].style.material == .solid {
+                        BackgroundEditorView(background: $store.actions[index].style.background)
+                    }
                 }
 
                 Section("Command") {
@@ -62,5 +76,15 @@ struct ActionEditorView: View {
                 description: Text("Choose an action from the sidebar, or add a new one.")
             )
         }
+    }
+
+    private func tintBinding(index: Int) -> Binding<Color> {
+        Binding(
+            get: {
+                store.actions[index].style.tintColor?.color
+                    ?? (store.actions[index].isDestructive ? .red : .accentColor)
+            },
+            set: { store.actions[index].style.tintColor = TileColor($0) }
+        )
     }
 }

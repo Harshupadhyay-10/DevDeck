@@ -33,27 +33,68 @@ private struct DeckButton: View {
     let action: DeckAction
     let onTap: () -> Void
 
+    private var tint: Color {
+        action.style.tintColor?.color ?? (action.isDestructive ? .red : .accentColor)
+    }
+
     var body: some View {
-        if action.isDestructive {
-            button.buttonStyle(.glassProminent).tint(.red)
-        } else {
-            button.buttonStyle(.glass).tint(.accentColor)
+        switch action.style.material {
+        case .glass:
+            glassButton
+        case .solid:
+            solidButton
         }
     }
 
-    private var button: some View {
-        Button(action: onTap) {
-            VStack(spacing: 12) {
-                Image(systemName: action.systemImage)
-                    .font(.system(size: 32, weight: .medium))
-                    .frame(height: 36)
-                Text(action.title)
-                    .font(.subheadline.weight(.medium))
-                    .lineLimit(1)
-            }
-            .frame(maxWidth: .infinity)
-            .aspectRatio(1, contentMode: .fit)
+    @ViewBuilder
+    private var glassButton: some View {
+        if action.isDestructive {
+            Button(action: onTap) { label }
+                .buttonStyle(.glassProminent)
+                .tint(tint)
+        } else {
+            Button(action: onTap) { label }
+                .buttonStyle(.glass)
+                .tint(tint)
         }
+    }
+
+    private var solidButton: some View {
+        Button(action: onTap) {
+            label.foregroundStyle(.white)
+        }
+        .buttonStyle(.plain)
+        .background(solidBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    @ViewBuilder
+    private var solidBackground: some View {
+        switch action.style.background {
+        case .none:
+            tint
+        case .color(let tileColor):
+            tileColor.color
+        case .image(let data):
+            if let image = decodedImage(data) {
+                image.resizable().scaledToFill()
+            } else {
+                tint
+            }
+        }
+    }
+
+    private var label: some View {
+        VStack(spacing: 12) {
+            Image(systemName: action.systemImage)
+                .font(.system(size: 32, weight: .medium))
+                .frame(height: 36)
+            Text(action.title)
+                .font(.subheadline.weight(.medium))
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .aspectRatio(1, contentMode: .fit)
     }
 }
 
