@@ -46,6 +46,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D3060295308C40E800FBBD7E"
                BuildableName = "DevDeckMacUITests.xctest"
+               BlueprintName = "DevDeckMacUITests"
                ReferencedContainer = "container:DevDeckMac.xcodeproj">
             </BuildableReference>
          </TestableReference>

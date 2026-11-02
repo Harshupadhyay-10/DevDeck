@@ -66,14 +66,21 @@ final class ActionServer {
     }
 
     private func runSession(_ connection: TCPConnection) async throws {
-        let sessionKey = try await RunSession.authenticateAsServer(
+        let (sessionKey, peerHello) = try await RunSession.authenticateAsServer(
             connection: connection,
             ourPrivateKey: MacIdentity.privateKey
         ) { [deviceStore] publicKey in
             deviceStore.devices.contains { $0.publicKeyData == publicKey }
         }
 
-        try await RunSession.send(DeckSyncMessage(actions: deckStore.actions), on: connection, using: sessionKey)
+        if let screen = peerHello.deviceScreen,
+           var device = deviceStore.devices.first(where: { $0.publicKeyData == peerHello.publicKey }) {
+            device.screen = screen
+            deviceStore.save(device)
+        }
+
+        let sync = DeckSyncMessage(actions: deckStore.actions, background: deckStore.background)
+        try await RunSession.send(sync, on: connection, using: sessionKey)
 
         guard let request = try? await RunSession.receive(RunActionRequest.self, from: connection, using: sessionKey) else {
             connection.close()

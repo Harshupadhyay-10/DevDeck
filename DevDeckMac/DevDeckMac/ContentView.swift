@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var pairingListener: PairingListener
     @State private var actionServer: ActionServer
     @State private var showingPairingSheet = false
+    @State private var showingBackgroundSheet = false
 
     init() {
         let deviceStore = PairedDeviceStore(service: MacIdentity.pairedDevicesService)
@@ -33,7 +34,11 @@ struct ContentView: View {
             sidebar
         } detail: {
             HStack(spacing: 0) {
-                PhonePreview(actions: store.actions)
+                PhonePreview(
+                    actions: store.actions,
+                    background: store.background,
+                    screen: deviceStore.devices.first?.screen
+                )
                     .frame(maxWidth: .infinity)
 
                 Divider()
@@ -52,9 +57,24 @@ struct ContentView: View {
                 .frame(width: 320)
             }
         }
-        .navigationTitle("Dev Deck")
+        .navigationTitle("DevDeck")
         .sheet(isPresented: $showingPairingSheet) {
             PairingSheet(listener: pairingListener)
+        }
+        .sheet(isPresented: $showingBackgroundSheet) {
+            NavigationStack {
+                Form {
+                    BackgroundEditorView(background: $store.background)
+                }
+                .formStyle(.grouped)
+                .frame(width: 360, height: 220)
+                .navigationTitle("Deck Background")
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { showingBackgroundSheet = false }
+                    }
+                }
+            }
         }
         .onAppear { actionServer.start() }
         .onDisappear { actionServer.stop() }
@@ -78,6 +98,15 @@ struct ContentView: View {
                             }
                         }
                 }
+            }
+
+            Section("Appearance") {
+                Button {
+                    showingBackgroundSheet = true
+                } label: {
+                    Label("Deck Background...", systemImage: "photo.on.rectangle")
+                }
+                .buttonStyle(.plain)
             }
 
             Section("Actions") {

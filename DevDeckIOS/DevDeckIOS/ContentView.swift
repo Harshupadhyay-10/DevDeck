@@ -13,6 +13,8 @@ struct ContentView: View {
     @State private var runner: ActionRunner
     @State private var showingPairing = false
     @State private var pendingDestructiveAction: DeckAction?
+    @AppStorage("hasShownLandscapeHint") private var hasShownLandscapeHint = false
+    @State private var showingLandscapeHint = false
 
     init() {
         let macStore = PairedDeviceStore(service: PhoneIdentity.pairedMacsService)
@@ -42,9 +44,22 @@ struct ContentView: View {
             .safeAreaInset(edge: .bottom) {
                 statusBanner
             }
-            .navigationTitle("Dev Deck")
-            .background(.background)
+            .navigationTitle("DevDeck")
+            .background {
+                ZStack {
+                    Color(.systemBackground)
+                    DeckBackgroundView(runner.background)
+                }
+                .ignoresSafeArea()
+            }
             .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        Task { await runner.refreshDeck() }
+                    } label: {
+                        Label("Refresh", systemImage: "arrow.clockwise")
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingPairing = true
@@ -58,7 +73,18 @@ struct ContentView: View {
             }) {
                 PairingView(macStore: macStore)
             }
-            .task { await runner.refreshDeck() }
+            .task {
+                await runner.refreshDeck()
+                if !hasShownLandscapeHint {
+                    hasShownLandscapeHint = true
+                    showingLandscapeHint = true
+                }
+            }
+            .alert("Best in Landscape", isPresented: $showingLandscapeHint) {
+                Button("Got It") {}
+            } message: {
+                Text("DevDeck is designed to be used in landscape, with more of the deck visible at once.")
+            }
             .confirmationDialog(
                 "Run \(pendingDestructiveAction?.title ?? "")?",
                 isPresented: Binding(

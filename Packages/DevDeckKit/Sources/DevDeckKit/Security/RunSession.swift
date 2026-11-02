@@ -18,10 +18,13 @@ public enum RunSession {
     public static func authenticateAsClient(
         connection: TCPConnection,
         ourPrivateKey: Curve25519.KeyAgreement.PrivateKey,
-        expectedPeerPublicKey: Data
+        expectedPeerPublicKey: Data,
+        deviceScreen: DeviceScreenInfo? = nil
     ) async throws -> SymmetricKey {
         let ourNonce = Data((0..<16).map { _ in UInt8.random(in: .min ... .max) })
-        try await connection.send(RunHello(publicKey: ourPrivateKey.publicKey.rawRepresentation, nonce: ourNonce))
+        try await connection.send(
+            RunHello(publicKey: ourPrivateKey.publicKey.rawRepresentation, nonce: ourNonce, deviceScreen: deviceScreen)
+        )
 
         let theirHello = try await connection.receive(RunHello.self)
         guard expectedPeerPublicKey == theirHello.publicKey else {
@@ -52,7 +55,7 @@ public enum RunSession {
         connection: TCPConnection,
         ourPrivateKey: Curve25519.KeyAgreement.PrivateKey,
         isPeerPaired: (Data) -> Bool
-    ) async throws -> SymmetricKey {
+    ) async throws -> (sessionKey: SymmetricKey, peerHello: RunHello) {
         let theirHello = try await connection.receive(RunHello.self)
         guard isPeerPaired(theirHello.publicKey) else {
             throw HandshakeError.unknownPeer
@@ -75,7 +78,7 @@ public enum RunSession {
         let ack = try PairingCrypto.seal(PairingConfirm.macMagic, using: sessionKey)
         try await connection.send(PairingConfirm(sealed: ack))
 
-        return sessionKey
+        return (sessionKey, theirHello)
     }
 
     public static func send(_ message: some Encodable, on connection: TCPConnection, using key: SymmetricKey) async throws {

@@ -18,7 +18,11 @@ public final class TCPConnection: @unchecked Sendable {
     private let input: InputStream
     private let output: OutputStream
     private let queue = DispatchQueue(label: "com.byHarshu.DevDeckKit.tcpconnection")
-    private static let maxMessageLength = 64 * 1024
+    /// Generous enough to carry a full deck sync with several tile
+    /// background images (each one is already downscaled and compressed
+    /// before being set on an action) without ever risking rejecting a
+    /// legitimate message.
+    private static let maxMessageLength = 4 * 1024 * 1024
 
     private init(input: InputStream, output: OutputStream) {
         self.input = input
@@ -106,12 +110,12 @@ public final class TCPConnection: @unchecked Sendable {
 
     private func writeAll(_ data: Data) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            queue.async { [output] in
+            queue.async {
                 var remaining = data
                 while !remaining.isEmpty {
                     let bytesWritten = remaining.withUnsafeBytes { raw -> Int in
                         guard let base = raw.bindMemory(to: UInt8.self).baseAddress else { return -1 }
-                        return output.write(base, maxLength: remaining.count)
+                        return self.output.write(base, maxLength: remaining.count)
                     }
                     guard bytesWritten > 0 else {
                         continuation.resume(throwing: ConnectionError.writeFailed)
@@ -126,13 +130,13 @@ public final class TCPConnection: @unchecked Sendable {
 
     private func readExact(_ count: Int) async throws -> Data {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Data, Error>) in
-            queue.async { [input] in
+            queue.async {
                 var buffer = Data()
                 var temp = [UInt8](repeating: 0, count: count)
                 while buffer.count < count {
                     let bytesRead = temp.withUnsafeMutableBytes { raw -> Int in
                         guard let base = raw.bindMemory(to: UInt8.self).baseAddress else { return -1 }
-                        return input.read(base, maxLength: count - buffer.count)
+                        return self.input.read(base, maxLength: count - buffer.count)
                     }
                     guard bytesRead > 0 else {
                         continuation.resume(throwing: ConnectionError.readFailed)

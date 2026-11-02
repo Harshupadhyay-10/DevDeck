@@ -8,11 +8,19 @@ public struct PairedDevice: Identifiable, Codable, Hashable, Sendable {
     public var displayName: String
     public let publicKeyData: Data
     public let pairedAt: Date
+    public var screen: DeviceScreenInfo?
 
-    public init(id: String, displayName: String, publicKeyData: Data, pairedAt: Date) {
+    public init(
+        id: String,
+        displayName: String,
+        publicKeyData: Data,
+        pairedAt: Date,
+        screen: DeviceScreenInfo? = nil
+    ) {
         self.id = id
         self.displayName = displayName
         self.publicKeyData = publicKeyData
         self.pairedAt = pairedAt
+        self.screen = screen
     }
 }

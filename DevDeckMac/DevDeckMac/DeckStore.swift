@@ -14,6 +14,7 @@ import Observation
 @Observable
 final class DeckStore {
     var actions: [DeckAction] = DeckAction.previewActions
+    var background: TileStyle.Background = .none
 
     func addAction() {
         let newAction = DeckAction(id: UUID().uuidString, title: "New Action", systemImage: "star")
