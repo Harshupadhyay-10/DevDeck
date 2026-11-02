@@ -5,14 +5,13 @@
 //  Created by Harsh Upadhyay on 24/10/2026.
 //
 
-import DevDeckKit
 import SwiftUI
 
 @main
 struct DevDeckIOSApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView(actions: DeckAction.previewActions)
+            ContentView()
         }
     }
 }

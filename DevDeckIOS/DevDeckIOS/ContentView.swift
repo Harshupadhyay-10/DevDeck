@@ -9,13 +9,38 @@ import DevDeckKit
 import SwiftUI
 
 struct ContentView: View {
-    let actions: [DeckAction]
+    @State private var macStore: PairedDeviceStore
+    @State private var runner: ActionRunner
     @State private var showingPairing = false
+    @State private var pendingDestructiveAction: DeckAction?
+
+    init() {
+        let macStore = PairedDeviceStore(service: PhoneIdentity.pairedMacsService)
+        _macStore = State(initialValue: macStore)
+        _runner = State(initialValue: ActionRunner(macStore: macStore))
+    }
 
     var body: some View {
         NavigationStack {
-            DeckGridView(actions: actions) { _ in
-                // Wiring to the Mac companion comes later.
+            Group {
+                if runner.actions.isEmpty {
+                    ContentUnavailableView(
+                        "No Deck Yet",
+                        systemImage: "square.grid.2x2",
+                        description: Text("Pair with your Mac to load its actions.")
+                    )
+                } else {
+                    DeckGridView(actions: runner.actions) { action in
+                        if action.isDestructive {
+                            pendingDestructiveAction = action
+                        } else {
+                            Task { await runner.run(action) }
+                        }
+                    }
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                statusBanner
             }
             .navigationTitle("Dev Deck")
             .background(.background)
@@ -28,13 +53,55 @@ struct ContentView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingPairing) {
-                PairingView()
+            .sheet(isPresented: $showingPairing, onDismiss: {
+                Task { await runner.refreshDeck() }
+            }) {
+                PairingView(macStore: macStore)
             }
+            .task { await runner.refreshDeck() }
+            .confirmationDialog(
+                "Run \(pendingDestructiveAction?.title ?? "")?",
+                isPresented: Binding(
+                    get: { pendingDestructiveAction != nil },
+                    set: { if !$0 { pendingDestructiveAction = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Run", role: .destructive) {
+                    if let action = pendingDestructiveAction {
+                        Task { await runner.run(action) }
+                    }
+                    pendingDestructiveAction = nil
+                }
+                Button("Cancel", role: .cancel) {
+                    pendingDestructiveAction = nil
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var statusBanner: some View {
+        switch runner.runStatus {
+        case .running(let id):
+            if let title = runner.actions.first(where: { $0.id == id })?.title {
+                Label("Running \(title)...", systemImage: "ellipsis.circle")
+                    .padding(8)
+                    .background(.thinMaterial, in: Capsule())
+                    .padding(.bottom, 8)
+            }
+        case .failed(let message):
+            Label(message, systemImage: "xmark.octagon.fill")
+                .foregroundStyle(.red)
+                .padding(8)
+                .background(.thinMaterial, in: Capsule())
+                .padding(.bottom, 8)
+        case .idle:
+            EmptyView()
         }
     }
 }
 
 #Preview {
-    ContentView(actions: DeckAction.previewActions)
+    ContentView()
 }

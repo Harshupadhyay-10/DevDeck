@@ -9,20 +9,34 @@ import DevDeckKit
 import SwiftUI
 
 struct PairingView: View {
+    let macStore: PairedDeviceStore
     @State private var client: PairingClient
     @State private var showingScanner = false
     @State private var selectedMacServiceName: String?
     @State private var pinEntry = ""
     @Environment(\.dismiss) private var dismiss
 
-    init() {
-        let macStore = PairedDeviceStore(service: PhoneIdentity.pairedMacsService)
+    init(macStore: PairedDeviceStore) {
+        self.macStore = macStore
         _client = State(initialValue: PairingClient(macStore: macStore))
     }
 
     var body: some View {
         NavigationStack {
             Form {
+                if !macStore.devices.isEmpty {
+                    Section("Already Paired") {
+                        ForEach(macStore.devices) { device in
+                            Label(device.displayName, systemImage: "laptopcomputer")
+                                .swipeActions {
+                                    Button("Remove", role: .destructive) {
+                                        macStore.remove(device)
+                                    }
+                                }
+                        }
+                    }
+                }
+
                 statusSection
 
                 Section("Scan") {
