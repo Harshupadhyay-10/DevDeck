@@ -5,6 +5,7 @@
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_devdeck._tcp</string>
+		<string>_devdeckrun._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Dev Deck needs local network access so your iPhone or iPad can find and pair with this Mac.</string>

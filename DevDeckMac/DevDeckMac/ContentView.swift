@@ -10,15 +10,22 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var store = DeckStore()
+    @State private var commandStore = ActionCommandStore()
     @State private var selectedActionID: String?
     @State private var deviceStore: PairedDeviceStore
     @State private var pairingListener: PairingListener
+    @State private var actionServer: ActionServer
     @State private var showingPairingSheet = false
 
     init() {
         let deviceStore = PairedDeviceStore(service: MacIdentity.pairedDevicesService)
+        let store = DeckStore()
+        let commandStore = ActionCommandStore()
         _deviceStore = State(initialValue: deviceStore)
+        _store = State(initialValue: store)
+        _commandStore = State(initialValue: commandStore)
         _pairingListener = State(initialValue: PairingListener(deviceStore: deviceStore))
+        _actionServer = State(initialValue: ActionServer(deviceStore: deviceStore, deckStore: store, commandStore: commandStore))
     }
 
     var body: some View {
@@ -33,7 +40,7 @@ struct ContentView: View {
 
                 Group {
                     if let selectedActionID {
-                        ActionEditorView(store: store, actionID: selectedActionID)
+                        ActionEditorView(store: store, commandStore: commandStore, actionID: selectedActionID)
                     } else {
                         ContentUnavailableView(
                             "No Action Selected",
@@ -49,6 +56,8 @@ struct ContentView: View {
         .sheet(isPresented: $showingPairingSheet) {
             PairingSheet(listener: pairingListener)
         }
+        .onAppear { actionServer.start() }
+        .onDisappear { actionServer.stop() }
     }
 
     private var sidebar: some View {

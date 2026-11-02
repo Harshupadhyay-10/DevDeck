@@ -8,14 +8,24 @@
 import DevDeckKit
 import SwiftUI
 
-/// Editor for one deck action's display: title, SF Symbol, and whether it
-/// is destructive. The Mac is the only place actions are edited.
+/// Editor for one deck action: display (title, SF Symbol, destructive)
+/// plus the actual command behind it, which stays on the Mac and is
+/// never sent to the phone. The Mac is the only place actions are
+/// edited.
 struct ActionEditorView: View {
     @Bindable var store: DeckStore
+    @Bindable var commandStore: ActionCommandStore
     let actionID: String
 
     private var index: Int? {
         store.actions.firstIndex { $0.id == actionID }
+    }
+
+    private var commandBinding: Binding<String> {
+        Binding(
+            get: { commandStore.command(for: actionID) ?? "" },
+            set: { commandStore.setCommand($0, for: actionID) }
+        )
     }
 
     var body: some View {
@@ -27,8 +37,18 @@ struct ActionEditorView: View {
                     Toggle("Destructive", isOn: $store.actions[index].isDestructive)
                 }
 
+                Section("Command") {
+                    TextField("Shell command", text: commandBinding, axis: .vertical)
+                        .lineLimit(2...6)
+                        .font(.system(.body, design: .monospaced))
+                    Text("Runs as you, via /bin/zsh, when this action is triggered from a paired device.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
                 Section {
                     Button("Delete Action", role: .destructive) {
+                        commandStore.removeCommand(for: actionID)
                         store.remove(store.actions[index])
                     }
                 }
