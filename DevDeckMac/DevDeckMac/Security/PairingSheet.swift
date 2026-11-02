@@ -55,7 +55,7 @@ struct PairingSheet: View {
         }
 
         VStack(spacing: 4) {
-            Text("Scan with the Dev Deck app, or enter this PIN:")
+            Text("Scan with the DevDeck app, or enter this PIN:")
                 .foregroundStyle(.secondary)
             Text(listener.pin)
                 .font(.system(.title, design: .monospaced).weight(.semibold))

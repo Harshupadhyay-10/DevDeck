@@ -55,7 +55,7 @@ final class PairingClient {
     func pair(qrString: String) {
         guard let data = qrString.data(using: .utf8),
               let payload = try? JSONDecoder().decode(PairingQRPayload.self, from: data) else {
-            status = .failed("That QR code isn't a Dev Deck pairing code.")
+            status = .failed("That QR code isn't a DevDeck pairing code.")
             return
         }
         pair(
