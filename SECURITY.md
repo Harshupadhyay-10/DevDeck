@@ -1,6 +1,6 @@
 # Security policy
 
-Dev Deck can run commands on a developer's computer, so security reports are
+DevDeck can run commands on a developer's computer, so security reports are
 taken seriously.
 
 ## Reporting a vulnerability

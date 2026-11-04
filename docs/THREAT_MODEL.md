@@ -1,6 +1,6 @@
 # Threat model
 
-This document describes what Dev Deck protects, who it protects against, and
+This document describes what DevDeck protects, who it protects against, and
 which design rules follow from that. It is written before the code so the code
 can be judged against it.
 

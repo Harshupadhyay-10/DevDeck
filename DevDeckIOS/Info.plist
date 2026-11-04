@@ -8,8 +8,15 @@
 		<string>_devdeckrun._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Dev Deck needs local network access to find and pair with your Mac.</string>
+	<string>DevDeck needs local network access to find and pair with your Mac.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Dev Deck uses the camera to scan the pairing QR code shown on your Mac.</string>
+	<string>DevDeck uses the camera to scan the pairing QR code shown on your Mac.</string>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+		<key>UIImageName</key>
+		<string>LaunchMark</string>
+	</dict>
 </dict>
 </plist>

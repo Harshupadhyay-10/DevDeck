@@ -1,4 +1,4 @@
-# Dev Deck
+# DevDeck
 
 A customizable button deck for developers. Run it on an iPhone or iPad and
 trigger actions on your Mac over the local network: git commands, scripts,

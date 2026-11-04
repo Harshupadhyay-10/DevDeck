@@ -1,4 +1,4 @@
-# Dev Deck
+# DevDeck
 
 Native Apple app: an iPhone/iPad deck that triggers predefined actions on a
 Mac over the local network. Read docs/THREAT_MODEL.md before any change.
